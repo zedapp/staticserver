@@ -1,0 +1,21 @@
+{
+    commands: {
+        "Tools:Static Server:Generate Full Site": {
+            scriptUrl: "./zcms.js",
+            action: "generate-full"
+        },
+        "Tools:Static Server:Start": {
+            scriptUrl: "./server.js",
+            action: "start"
+        },
+        "Tools:Static Server:Request": {
+            scriptUrl: "./server.js",
+            action: "request",
+            internal: true
+        },
+        "Tools:Static Server:Stop": {
+            scriptUrl: "./server.js",
+            action: "stop"
+        }
+    }
+}

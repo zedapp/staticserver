@@ -1,0 +1,10 @@
+{
+    "name": "Static File Web Server",
+    "uri": "gh:zedapp/staticserver",
+    "version": "0.1",
+    "description": "Static file serving embedded in Zed",
+    "files": [
+        "server.js",
+        "mime_types.js"
+    ]
+}
