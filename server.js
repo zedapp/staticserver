@@ -1,10 +1,10 @@
 var http = require("zed/http");
 var fs = require("zed/fs");
+var configFs = require("zed/config_fs");
 var ui = require("zed/ui");
 
 var mimeTypes = require("./mime_types");
 // TODO: make this configurable
-var prefix = "";
 
 function getContentType(path) {
     var parts = path.split('.');
@@ -29,7 +29,7 @@ function serveFileListing() {
     });
 }
 
-function requestHandler(req) {
+function requestHandler(fs, prefix, req) {
     var path = req.path;
     return fs.readFile(prefix + path, true).then(function(content) {
         return {
@@ -77,7 +77,13 @@ module.exports = function(info) {
             });
             break;
         case 'request':
-            return requestHandler(info.request);
+            console.log("Got request", info);
+            var fs_ = fs;
+            if(info.fs === "config") {
+                fs_ = configFs;
+            }
+            var prefix = info.prefix || "";
+            return requestHandler(fs_, prefix, info.request);
         case 'stop':
             http.stopServer("staticserver");
             break;
