@@ -31,16 +31,10 @@ function serveFileListing() {
 
 function requestHandler(fs, prefix, req) {
     var path = req.path;
-    return fs.readFile(prefix + path, true).then(function(content) {
-        return {
-            status: 200,
-            headers: {
-                "Content-Type": getContentType(path)
-            },
-            body: content
-        };
-    }, function() {
-        // We'll assume a not found error. Let's try one more thing: adding /index.html to the end
+    var pathParts = path.split('/');
+    var isDir = path[path.length - 1] === '/' || pathParts[pathParts.length - 1].indexOf('.') === -1;
+    if (isDir) {
+        // Let's normalize the path a bit
         if (path[path.length - 1] === "/") {
             path = path.substring(0, path.length - 1);
         }
@@ -54,9 +48,18 @@ function requestHandler(fs, prefix, req) {
                 body: content
             };
         }, function() {
-            if (path === "/" || path === "") {
-                return serveFileListing();
-            }
+            return serveFileListing();
+        });
+    } else {
+        return fs.readFile(prefix + path, true).then(function(content) {
+            return {
+                status: 200,
+                headers: {
+                    "Content-Type": getContentType(path)
+                },
+                body: content
+            };
+        }, function() {
             return {
                 status: 404,
                 headers: {
@@ -65,7 +68,7 @@ function requestHandler(fs, prefix, req) {
                 body: "Not found"
             };
         });
-    });
+    }
 }
 
 module.exports = function(info) {
@@ -77,7 +80,6 @@ module.exports = function(info) {
             });
             break;
         case 'request':
-            console.log("Got request", info);
             var fs_ = fs;
             if(info.fs === "config") {
                 fs_ = configFs;
