@@ -12,25 +12,48 @@ function getContentType(path) {
     return mimeTypes[ext] || "application/octet-stream";
 }
 
+function StringToBinary(string) {
+    var chars, code, i, isUCS2, len, _i;
+
+    len = string.length;
+    chars = [];
+    isUCS2 = false;
+    for (i = _i = 0; 0 <= len ? _i < len : _i > len; i = 0 <= len ? ++_i : --_i) {
+        code = String.prototype.charCodeAt.call(string, i);
+        if (code > 255) {
+            isUCS2 = true;
+            chars = null;
+            break;
+        } else {
+            chars.push(code);
+        }
+    }
+    if (isUCS2 === true) {
+        return unescape(encodeURIComponent(string));
+    } else {
+        return String.fromCharCode.apply(null, Array.prototype.slice.apply(chars));
+    }
+}
+
 function serveFileListing() {
     return fs.listFiles().then(function(allFiles) {
         var html = "<body><h1>File listing</h1><ul>";
         allFiles.forEach(function(path) {
-            html += "<li><a href='" + path + "'>" + path + "</a></li>";
+            html += "<li><a href='" + encodeURI(path) + "'>" + path + "</a></li>";
         });
         html += "<ul></body>";
         return {
             status: 200,
             headers: {
-                "Content-Type": "text/html",
+                "Content-Type": "text/html; charset=UTF-8"
             },
-            body: html
+            body: StringToBinary(html)
         };
     });
 }
 
 function requestHandler(fs, prefix, req) {
-    var path = req.path;
+    var path = decodeURI(req.path);
     var pathParts = path.split('/');
     var isDir = path[path.length - 1] === '/' || pathParts[pathParts.length - 1].indexOf('.') === -1;
     if (isDir) {
